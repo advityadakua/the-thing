@@ -49,22 +49,79 @@ elif page == "About":
     )
 
 elif page == "Shop":
-    st.header("Shop Merchendise")
-    st.write("You can implement donations via Credit/Debit card. Below is a demo.")
-    with st.form("donation_form"):
-        donor_name = st.text_input("Full name")
-        donor_email = st.text_input("Email")
-        donor_cardnumber = st.text_input("Card Number:","")
-        message = st.text_area("Message (optional)")
-        amount = 
-        submit = st.form_submit_button("Pay (demo)")
-        
-        if submit:
-            # TODO: Replace with real payment flow (Stripe Checkout/Payment Intent server-side)
-            add_donation_record(donor_name, donor_email, amount, message)
-            st.success(f"Thank you {donor_name}! Donation of ${amount:.2f} recorded locally (demo).")
-            st.info("Hook this form up to a payment processor and server-side verification.")
+    from io import BytesIO
+    from PIL import Image
+    
+    # Admin flag (replace with login logic later if you want)
+    is_admin = st.sidebar.checkbox("Admin Mode", value=False)
+    
+    # Initialize session state for store and cart
+    if "store_items" not in st.session_state:
+        st.session_state.store_items = [
+            {"name": "Apple", "price": 1.00, "image": None},
+            {"name": "Banana", "price": 0.75, "image": None},
+        ]
+    
+    if "cart" not in st.session_state:
+        st.session_state.cart = []
+    
+    st.title("🛍️ My Streamlit Shop")
+    
+    # --- ADMIN SECTION ---
+    if is_admin:
+        st.subheader("Admin Panel - Add Items")
+        with st.form("add_item_form", clear_on_submit=True):
+            name = st.text_input("Item name")
+            price = st.number_input("Item price ($)", min_value=0.0, step=0.01)
+            image_file = st.file_uploader("Upload an image", type=["png", "jpg", "jpeg"])
+            submitted = st.form_submit_button("Add Item")
+    
+            if submitted:
+                if name:
+                    image_data = None
+                    if image_file:
+                        
+                        image_data = image_file.getvalue()
+                    st.session_state.store_items.append({
+                        "name": name,
+                        "price": price,
+                        "image": image_data
+                    })
+                    st.success(f"Added {name} (${price:.2f}) to the store!")
+                else:
+                    st.warning("Please enter an item name.")
+    
+    st.divider()
+    
+    st.subheader("🛒 Available Items")
+    
+    for item in st.session_state.store_items:
+        with st.container():
+            cols = st.columns([1, 2, 1])
 
+            if item["image"]:
+                image = Image.open(BytesIO(item["image"]))
+                cols[0].image(image, width=100)
+            else:
+                cols[0].write("🖼️ No image")
+    
+            cols[1].markdown(f"**{item['name']}**\n\n${item['price']:.2f}")
+    
+            if cols[2].button("Add to Cart", key=item["name"]):
+                st.session_state.cart.append(item)
+                st.success(f"Added {item['name']} to cart!")
+    
+    st.divider()
+    
+    st.subheader("🧺 Your Cart")
+    if st.session_state.cart:
+        total = sum(item["price"] for item in st.session_state.cart)
+        for item in st.session_state.cart:
+            st.write(f"- {item['name']} (${item['price']:.2f})")
+        st.write(f"**Total: ${total:.2f}**")
+    else:
+        st.write("Your cart is empty.")
+    
 elif page == "Admin":
     st.header("Admin")
     if not is_admin():
