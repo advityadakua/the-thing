@@ -37,7 +37,14 @@ elif page == "About":
     st.header("Join The Leagacy")
     st.write(
         """
-        The Marathon Of Hope began in 1980 when Terry Fox set out on a 
+        The Marathon of Hope began in 1980 when Terry Fox set out on an 
+        unforgettable journey across Canada to raise funds and awareness 
+        for cancer reasearch. Running a marathon on a prosthetic leg, Terry 
+        inspired a nation with his determination, courage, and hope. Though
+        his run ended after 143 days, his mission still lives on - and you can 
+        be a part of it. Every purchase from our merchandise collection supports 
+        cancer reasearch and helps keep Terry's dream alive. Wear the cause,
+        spread the message, and carry the Marathon of Hope forward.
         """
     )
 
@@ -47,9 +54,11 @@ elif page == "Shop":
     with st.form("donation_form"):
         donor_name = st.text_input("Full name")
         donor_email = st.text_input("Email")
-        amount = st.number_input("Amount (CAD)", min_value=1.0, step=1.0, value=10.0)
+        donor_cardnumber = st.text_input("Card Number:","")
         message = st.text_area("Message (optional)")
-        submit = st.form_submit_button("Donate (demo)")
+        amount = 
+        submit = st.form_submit_button("Pay (demo)")
+        
         if submit:
             # TODO: Replace with real payment flow (Stripe Checkout/Payment Intent server-side)
             add_donation_record(donor_name, donor_email, amount, message)
@@ -57,14 +66,15 @@ elif page == "Shop":
             st.info("Hook this form up to a payment processor and server-side verification.")
 
 elif page == "Admin":
-    st.header("Admin (demo)")
+    st.header("Admin")
     if not is_admin():
         if st.button("Log in as admin (demo)"):
+            
             st.session_state["is_admin"] = True
             st.experimental_rerun()
     else:
         st.success("Logged in as admin (demo).")
-        st.write("Admin tools: view donations, export CSV, manage content (implement as needed).")
+        st.write("Admin tools: view donations, add merchandise.")
         # TODO: add admin functions e.g., list donations, delete, export
         st.button("Log out", on_click=lambda: st.session_state.update({"is_admin": False}))
 
