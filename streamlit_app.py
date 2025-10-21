@@ -39,11 +39,11 @@ elif page == "About":
         """
         The Marathon of Hope began in 1980 when Terry Fox set out on an 
         unforgettable journey across Canada to raise funds and awareness 
-        for cancer reasearch. Running a marathon on a prosthetic leg, Terry 
+        for cancer research. Running a marathon on a prosthetic leg, Terry 
         inspired a nation with his determination, courage, and hope. Though
         his run ended after 143 days, his mission still lives on - and you can 
         be a part of it. Every purchase from our merchandise collection supports 
-        cancer reasearch and helps keep Terry's dream alive. Wear the cause,
+        cancer research and helps keep Terry's dream alive. Wear the cause,
         spread the message, and carry the Marathon of Hope forward.
         """
     )
@@ -52,10 +52,8 @@ elif page == "Shop":
     from io import BytesIO
     from PIL import Image
     
-    # Admin flag (replace with login logic later if you want)
-    is_admin = st.sidebar.checkbox("Admin Mode", value=False)
     
-    # Initialize session state for store and cart
+    # Initialize session state
     if "store_items" not in st.session_state:
         st.session_state.store_items = [
             {"name": "Apple", "price": 1.00, "image": None},
@@ -69,7 +67,9 @@ elif page == "Shop":
     
     # --- ADMIN SECTION ---
     if is_admin:
-        st.subheader("Admin Panel - Add Items")
+        st.subheader("🧰 Admin Panel - Manage Items")
+    
+        # Add item form
         with st.form("add_item_form", clear_on_submit=True):
             name = st.text_input("Item name")
             price = st.number_input("Item price ($)", min_value=0.0, step=0.01)
@@ -78,27 +78,39 @@ elif page == "Shop":
     
             if submitted:
                 if name:
-                    image_data = None
-                    if image_file:
-                        
-                        image_data = image_file.getvalue()
+                    image_data = image_file.getvalue() if image_file else None
                     st.session_state.store_items.append({
                         "name": name,
                         "price": price,
                         "image": image_data
                     })
-                    st.success(f"Added {name} (${price:.2f}) to the store!")
+                    st.success(f"✅ Added {name} (${price:.2f}) to the store!")
                 else:
                     st.warning("Please enter an item name.")
     
+        st.divider()
+        st.subheader("🗑️ Remove Items")
+    
+        if st.session_state.store_items:
+            item_names = [item["name"] for item in st.session_state.store_items]
+            to_remove = st.selectbox("Select an item to remove", item_names)
+            if st.button("Remove Selected Item"):
+                st.session_state.store_items = [
+                    item for item in st.session_state.store_items if item["name"] != to_remove
+                ]
+                st.success(f"🗑️ Removed {to_remove} from the store.")
+        else:
+            st.info("No items in the store yet.")
+    
     st.divider()
     
+    # --- SHOP SECTION ---
     st.subheader("🛒 Available Items")
     
     for item in st.session_state.store_items:
         with st.container():
             cols = st.columns([1, 2, 1])
-
+            # Show image
             if item["image"]:
                 image = Image.open(BytesIO(item["image"]))
                 cols[0].image(image, width=100)
@@ -107,13 +119,15 @@ elif page == "Shop":
     
             cols[1].markdown(f"**{item['name']}**\n\n${item['price']:.2f}")
     
-            if cols[2].button("Add to Cart", key=item["name"]):
+            if cols[2].button("Add to Cart", key=f"add_{item['name']}"):
                 st.session_state.cart.append(item)
                 st.success(f"Added {item['name']} to cart!")
     
     st.divider()
     
+    # --- CART SECTION ---
     st.subheader("🧺 Your Cart")
+    
     if st.session_state.cart:
         total = sum(item["price"] for item in st.session_state.cart)
         for item in st.session_state.cart:
@@ -121,6 +135,7 @@ elif page == "Shop":
         st.write(f"**Total: ${total:.2f}**")
     else:
         st.write("Your cart is empty.")
+
     
 elif page == "Admin":
     st.header("Admin")
