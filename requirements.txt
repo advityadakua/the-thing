@@ -1,3 +1,8 @@
 streamlit
+<<<<<<< HEAD
 pillow==9.5.0
 reportlab
+=======
+pillow
+reportlab
+>>>>>>> d1d1ad6
