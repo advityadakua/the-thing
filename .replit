@@ -1,12 +1,2 @@
-run = "streamlit run streamlit_app.py"
-
-[env]
-PYTHONPATH = "."
-PIP_TARGET = ".pythonlibs"
-PATH = "${PIP_TARGET}/bin:${PATH}"
-
-[packager]
 language = "python3"
-
-[packager.features]
-pip = true
+run = "streamlit run streamlit_app.py"
